@@ -1,0 +1,94 @@
+services:
+  app:
+    build:
+      context: .
+    command: bash -c "rm -f tmp/pids/server.pid && bin/dev"
+    container_name: migrator
+    volumes:
+      - ./app:/app
+      - storage_data:/app/storage
+    ports:
+      - "0.0.0.0:3000:3000"
+    environment:
+      - DATABASE_URL=postgres://postgres:example@db:5432/ava
+      - RAILS_ENV=development
+      - REDIS_URL=redis://redis:6379/0
+      - SIDEKIQ_USERNAME=admin
+      - SIDEKIQ_PASSWORD=password
+      - AWS_ACCESS_KEY_ID=${S3_ACCESS_KEY}
+      - AWS_SECRET_ACCESS_KEY=${S3_SECRET_KEY}
+      - AWS_BUCKET=${S3_BUCKET}
+      - AWS_ENDPOINT=${S3_ENDPOINT}
+      - AWS_REGION=${S3_REGION}
+    env_file:
+      - .env
+    depends_on:
+      - db
+      - redis
+      - minio
+    tty: true
+    stdin_open: true
+
+  db:
+    image: postgres:latest
+    container_name: migrator-db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=example
+      - POSTGRES_DB=ava
+    ports:
+      - "12345:5432"
+
+  redis:
+    image: redis:latest
+    container_name: migrator-redis
+    volumes:
+      - redis_data:/data
+  sidekiq:
+    build:
+      context: .
+    command: bundle exec sidekiq
+    container_name: migrator-sidekik
+    environment:
+      - DATABASE_URL=postgres://postgres:example@db:5432/ava
+      - RAILS_ENV=development
+      - REDIS_URL=redis://redis:6379/0
+      - SIDEKIQ_USERNAME=admin
+      - SIDEKIQ_PASSWORD=password
+      - AWS_ACCESS_KEY_ID=${S3_ACCESS_KEY}
+      - AWS_SECRET_ACCESS_KEY=${S3_SECRET_KEY}
+      - AWS_BUCKET=${S3_BUCKET}
+      - AWS_ENDPOINT=${S3_ENDPOINT}
+      - AWS_REGION=${S3_REGION}
+      - AWS_ENDPOINT=http://minio:9000
+
+    volumes:
+      - ./app:/app
+    env_file:
+      - .env
+    depends_on:
+      - db
+      - redis
+
+  minio:
+    image: minio/minio:latest
+    container_name: migrator-minio
+    volumes:
+      - storage_data:/data
+      - ./cors.json:/etc/minio/cors.json
+    environment:
+      - MINIO_ROOT_USER=${S3_ACCESS_KEY}
+      - MINIO_ROOT_PASSWORD=${S3_SECRET_KEY}
+    command: server /data --console-address ":9001"
+    env_file:
+      - .env
+    ports:
+      - "9010:9000"
+      - "9001:9001"
+
+volumes:
+  postgres_data:
+  redis_data:
+  storage_data:

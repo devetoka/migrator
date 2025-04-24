@@ -1,0 +1,97 @@
+<div class="min-h-screen bg-gray-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-lg w-full space-y-8 bg-white p-8 rounded-lg shadow-lg animate-fade-in">
+    <div>
+      <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900 tracking-tight">
+        Create Import for <%= @hospital.name %>
+      </h2>
+      <p class="mt-2 text-center text-sm text-gray-600">
+        Upload your CSV and mapping YAML to get started.
+      </p>
+    </div>
+
+    <%= render 'shared/flash' %>
+
+    <%= form_with model: [@hospital, @import], url: hospital_imports_path(@hospital), data: { turbo: false, controller: "import-form" }, html: { id: "csvUpload", multipart: true, class: "space-y-6" } do |form| %>
+      <% if @import.errors.any? %>
+        <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md relative" role="alert">
+          <div class="flex">
+            <div class="flex-shrink-0">
+              <svg class="h-5 w-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            </div>
+            <div class="ml-3">
+              <h3 class="text-sm font-medium">There were <%= pluralize(@import.errors.count, "error") %> with your submission:</h3>
+              <ul class="mt-2 text-sm list-disc list-inside">
+                <% @import.errors.full_messages.each do |message| %>
+                  <li><%= message %></li>
+                <% end %>
+              </ul>
+            </div>
+          </div>
+          <button onclick="this.parentElement.style.display='none'" class="absolute top-0 right-0 mt-4 mr-4 text-red-500 hover:text-red-700">
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+          </button>
+        </div>
+      <% end %>
+
+      <div class="flex justify-between items-center">
+        <a href="<%= sample_yaml_imports_path %>" class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-indigo-600 hover:text-indigo-800 transition duration-200">
+          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+          Download Sample YAML
+        </a>
+        <%= link_to "Cancel", hospital_imports_path(@hospital), class: "inline-flex items-center px-3 py-1.5 text-sm font-medium text-gray-600 hover:text-gray-800 bg-gray-100 rounded-md hover:bg-gray-200 transition duration-200" %>
+      </div>
+
+      <fieldset class="space-y-6">
+        <legend class="text-base font-medium text-gray-900">Upload Files</legend>
+
+        <div>
+          <%= form.label :import_type, "Type of CSV Upload", class: "block text-sm font-medium text-gray-700" %>
+          <%= form.select :import_type,
+                          Import.import_types.keys.map { |p| [p.humanize, p] },
+                          { prompt: "Select Type" },
+                          required: true,
+                          class: "mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm transition duration-200"
+                           %>
+        </div>
+
+        <div>
+          <%= form.label :yaml_content, "YAML Mapping File", class: "block text-sm font-medium text-gray-700" %>
+          <div class="mt-1 relative">
+            <%= form.file_field :yaml_content,
+                                accept: ".yaml,.yml",
+                                required: true,
+                                class: "block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 file:transition file:duration-200"
+                                 %>
+          </div>
+        </div>
+
+        <div>
+          <%= form.label :csv_file, "CSV File", class: "block text-sm font-medium text-gray-700" %>
+          <div class="mt-1 relative">
+            <%= form.file_field :csv_file,
+                                accept: ".csv",
+                                required: true,
+                                class: "block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 file:transition file:duration-200"
+                                 %>
+          </div>
+        </div>
+      </fieldset>
+
+      <div>
+        <%= form.submit "Upload",
+                        class: "w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-200 cursor-pointer"
+                         %>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<style>
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fade-in {
+        animation: fadeIn 0.5s ease-out;
+    }
+</style>

@@ -1,0 +1,66 @@
+@import "tailwindcss";
+
+@theme {
+    --color-primary: #1D4ED8;
+    --color-secondary: #0D9488;
+    --color-brand-color: #2563eb;
+    --color-brand-color-dark: #214ba7;
+}
+
+input {
+    border-radius: 0 !important;
+}
+
+input[type='submit'], button[type='submit'] {
+    @apply bg-brand-color  cursor-pointer
+}
+
+input[type='submit']:hover, button[type='submit']:hover {
+    @apply bg-brand-color-dark
+}
+
+/* For Tailwind, add these classes to your pagination div or use a custom CSS file */
+.pagination a, .pagination span {
+    @apply text-sm font-medium px-3 py-1 rounded-full transition duration-200;
+}
+
+.pagination a {
+    @apply text-brand-color hover:bg-brand-color hover:text-white;
+}
+
+.pagination .current {
+    @apply bg-brand-color text-white shadow-md;
+}
+
+.pagination .disabled {
+    @apply text-gray-400 cursor-not-allowed;
+}
+
+.pagination a, .pagination span {
+    padding-inline: calc(var(--spacing)* 1.5) !important;
+}
+
+/* app/assets/stylesheets/application.css */
+.pagination .first,
+.pagination .last {
+    display: none;
+}
+
+@layer components {
+    .brand-btn-primary {
+        @apply cursor-pointer bg-brand-color text-white py-3 px-4  hover:bg-brand-color-dark focus:outline-none focus:ring-4 focus:ring-blue-300 transition duration-300
+    }
+
+
+    .brand-btn-secondary {
+        @apply cursor-pointer bg-gradient-to-r from-gray-900 to-black text-white py-3 px-4 hover:from-gray-800 hover:to-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-300 transition duration-300;
+    }
+
+    .brand-error {
+        @apply bg-red-50 border-red-400 text-red-800
+    }
+
+    .input-class {
+        @apply mt-1 block w-full text-sm text-gray-600 border border-gray-300 p-2
+    }
+}

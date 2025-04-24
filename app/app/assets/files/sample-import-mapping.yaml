@@ -1,0 +1,14 @@
+mappings:
+  patient:
+    medical_record_number: "MRN"
+    first_name: "First Name"
+    last_name: "Last Name"
+    date_of_birth: "DOB"
+    gender: "Sex"
+    email: "Email"
+    phone_number: "Phone"
+  address:
+    street: "Street Address"
+    city: "City"
+    region: "Province"
+    postal_code: "Postal Code"

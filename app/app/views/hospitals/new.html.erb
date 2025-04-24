@@ -1,0 +1,36 @@
+<div class="min-h-screen bg-gray-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+  <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md animate-fade-in">
+    <h1 class="text-2xl font-extrabold text-gray-900 mb-6 text-center tracking-tight">Add New Hospital</h1>
+
+    <%= form_with model: @hospital, class: "space-y-6", data: { turbo: false } do |form| %>
+      <%= render 'shared/errors', resource: @hospital %>
+
+      <div>
+        <%= form.label :name, class: "block text-sm font-medium text-gray-700" %>
+        <%= form.text_field :name, class: "mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm transition duration-200", placeholder: "e.g., St. Mary's Hospital", required: true, data: { input: "name" } %>
+      </div>
+
+      <div>
+        <%= form.label :code, class: "block text-sm font-medium text-gray-700" %>
+        <%= form.text_field :code, class: "mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm transition duration-200", placeholder: "e.g., STMARYS", required: true, data: { input: "code" } %>
+      </div>
+
+      <div class="flex space-x-4">
+        <%= form.submit "Create Hospital", class: "flex-1 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-200 cursor-pointer" %>
+        <%= link_to "Cancel", hospitals_path, class: "flex-1 py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 text-center transition duration-200" %>
+      </div>
+    <% end %>
+
+    <%= render 'shared/flash' %>
+  </div>
+</div>
+
+<style>
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fade-in {
+        animation: fadeIn 0.5s ease-out;
+    }
+</style>
