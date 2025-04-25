@@ -4,7 +4,7 @@ class Import < ActiveRecord::Base
   belongs_to :hospital
   before_validation :set_name
 
-  validates :name, presence: true, uniqueness: { scope: :hospital_id, message: "is already taken for this hospital" }
+  validates :name, presence: true
   validates :yaml_content, presence: true
   validates :status, inclusion: { in: %w[pending processing completed failed] }
 
@@ -14,6 +14,6 @@ class Import < ActiveRecord::Base
   def set_name
     initials = hospital.code
     date = Date.today.to_s
-    self.name ||= "#{initials}-#{date}-import"
+    self.name ||= "#{initials}-#{date}-import.#{rand(1000..5000)}"
   end
 end

@@ -6,7 +6,7 @@ class ImportsController < ApplicationController
     if @hospital.present?
       @imports = @hospital&.imports
     else
-      @imports = Import.all || []
+      @imports = Import.order(created_at: :desc) || []
     end
   end
   def new

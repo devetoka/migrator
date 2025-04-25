@@ -39,7 +39,7 @@ function handleSubmit(e) {
             return notifyBackend(import_id, file_key, headers);
         })
         .then(() => {
-            setTimeout(() => window.location.replace("/imports"), 2000)
+            setTimeout(() => window.location.replace("/imports"), 200)
 
             notify('notice', 'Successfully uploaded. Import processing starting soon.')
         })

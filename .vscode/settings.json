@@ -1,0 +1,14 @@
+{
+    "sqltools.connections": [
+        {
+            "previewLimit": 50,
+            "server": "localhost",
+            "port": 12345,
+            "driver": "PostgreSQL",
+            "name": "migrator",
+            "username": "postgres",
+            "password": "example",
+            "database": "ava"
+        }
+    ]
+}

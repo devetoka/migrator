@@ -10,39 +10,49 @@ module CsvMappers
       @hospital_id = hospital_id
       @patients = []
       @number_of_patients_saved = 0
+      @number_of_patients_skipped = 0
       @number_of_addresses_saved = 0
       @errors = []
+      @batch = []
+      @mrns = {}
     end
 
     def process
       row_index = 0
-      CSV.new(@file_data, headers: true).each do |row|
+      CSV.new(@file_data, headers: true, col_sep: get_separator).each do |row|
         row_index += 1
 
         begin
           mapped = map_row(row)
-          validate_and_create_patient_with_address(mapped, row_index) if mapped['patient'].present?
+          @batch << [mapped, row_index]
 
-          save_to_database if row_index % BATCH_SIZE == 0
+          process_batch if row_index % BATCH_SIZE == 0
         rescue => e
           log_errors(e.message, row_index, e.backtrace)
         end
       end
 
       begin
-        save_to_database
+        process_batch
       rescue => e
         log_errors(e.message, row_index, e.backtrace)
         return {
           status: 'failed',
-          number_of_patients_saved: @number_of_patients_saved,
+          number_of_patients_saved: @number_of_patients_saved + @number_of_patients_skipped,
           number_of_addresses_saved: @number_of_addresses_saved,
           errors: @errors,
         }
       end
+
+      @mrns.each do |key, value|
+        if value.size > 1
+          log_errors("Duplicate medical record number '#{key}' found in rows #{value.join(', ')}", value.first)
+        end
+      end      
+
       {
         status: 'success',
-        number_of_patients_saved: @number_of_patients_saved,
+        number_of_patients_saved: @number_of_patients_saved + @number_of_patients_skipped,
         number_of_addresses_saved: @number_of_addresses_saved,
         errors: @errors,
       }
@@ -53,12 +63,76 @@ module CsvMappers
       raise NotImplementedError, "Implement this method"
     end
 
+    def get_separator()
+      raise NotImplementedError, "Implement this method"
+    end
+
     private
 
+    # Identifies and removes duplicates from the csv
+    # They will be recorded as error and skipped
+    def get_filtered_mrn
+      filtered_mrn = []
+        @batch.each do |item| 
+          mapped , row_index = item
+          mrn = mapped['patient']['medical_record_number'] 
+          if @mrns.key?(mrn)
+            @mrns[mrn] << row_index
+            filtered_mrn.reject! { |entry| entry == mrn }
+            next
+          else
+            @mrns[mrn] = [row_index]
+            filtered_mrn << mrn
+          end
+        end
+      filtered_mrn
+    end
+
+    def validate(filtered_mrn)
+      @batch.each do |mapped, row_index|
+        begin
+          if !filtered_mrn.include?(mapped['patient']['medical_record_number'])
+            log_errors('Duplicate medical record number', row_index)
+          else
+            validate_and_create_patient_with_address(mapped, row_index) if mapped['patient'].present?
+          end
+
+        rescue => e 
+          log_errors(e.message, row_index, e.backtrace)
+        end
+      end
+    end
+
+
+
+    # Processes batch: Removes duplicates, validates and stores to DB
+    def process_batch
+      if @batch.any?
+        mrns = get_filtered_mrn
+        
+        @existing_patients_mrn = Patient.where(medical_record_number: mrns, hospital_id: @hospital_id).pluck(:medical_record_number)
+        
+        validate(mrns)
+        
+        save_to_database
+    
+        @batch.clear
+        @existing_patients_mrn.clear
+      end
+    end
+    
+
+    # creates model and runs model validations
     def validate_and_create_patient_with_address(mapped, row_index)
       errors = []
       patient = Patient.new(mapped['patient'])
       patient[:hospital_id] = @hospital_id
+
+      if @existing_patients_mrn.include?(patient.medical_record_number)
+        patient.skip_mrn_validation = true
+        @number_of_patients_skipped += 1
+        return
+      end
 
       if mapped['address'].present?
         patient.address = Address.new(mapped['address'])
@@ -83,7 +157,6 @@ module CsvMappers
       patient_with_row_number = {}
 
       @patients.each do |patient|
-        puts "here"
         patient_object = patient[:patient]
         row = patient[:row_index]
         patients << patient_object
@@ -123,10 +196,13 @@ module CsvMappers
       valid_addresses, successful_inserts = get_valid_addresses(addresses, imported_patients, patient_with_row_number)
 
       if valid_addresses.any?
+
         imported_addresses = Address.import(
           valid_addresses,
-          validate: true,
-          on_duplicate_key_ignore: true
+          on_duplicate_key_update: {
+            conflict_target: [:patient_id],
+            columns: Address.column_names - ['id', 'created_at', 'updated_at']
+          },
         )
         @number_of_addresses_saved += imported_addresses.results.size
         handle_failed_address_import_errors(imported_addresses, patient_with_row_number, successful_inserts)
@@ -152,6 +228,7 @@ module CsvMappers
       end
     end
 
+    # Return addresses of patients that were successfully saved
     def get_valid_addresses(addresses, imported_patients, row_numbers)
       successful_inserts = imported_patients.results.map { |result| [result[0], result[1]] }
       valid_addresses = []
@@ -175,7 +252,15 @@ module CsvMappers
         file, line = backtrace.first.split(':')
         context = {file: file, line: line}
       end
-      @errors << { error: message, line: row_index, context: context  }
+
+      existing_error = @errors.find { |e| e[:line] == row_index }
+
+      if existing_error 
+        existing_error[:error] += ", #{message}"
+      else
+        @errors << { error: message, line: row_index, context: context }
+      end
+
     end
 
   end

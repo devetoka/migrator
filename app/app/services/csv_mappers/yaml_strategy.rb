@@ -16,5 +16,9 @@ module CsvMappers
       end
       mappings
     end
+
+    def get_separator
+      @mapping['delimiter']
+    end
   end
 end

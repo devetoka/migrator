@@ -6,6 +6,8 @@ class Address < ApplicationRecord
   before_validation :infer_country_and_normalize
   validates :region, inclusion: { in: :valid_regions, message: "is not a valid region" }, presence: { message: "can't be blank" }
   validates :country, inclusion: { in: ->(_) { Carmen::Country.all.map(&:name) }, allow_nil: true }
+  validates :street, :city, :region, :postal_code, presence: true
+
 
   private
 

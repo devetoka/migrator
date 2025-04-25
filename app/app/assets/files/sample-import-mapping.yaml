@@ -12,3 +12,4 @@ mappings:
     city: "City"
     region: "Province"
     postal_code: "Postal Code"
+delimiter: ','
