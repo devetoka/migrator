@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_04_24_221430) do
+ActiveRecord::Schema[7.1].define(version: 2025_04_25_174121) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -45,6 +45,8 @@ ActiveRecord::Schema[7.1].define(version: 2025_04_24_221430) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "import_type", null: false
+    t.jsonb "error_logs", default: []
+    t.float "time_taken", default: 0.0
     t.index ["hospital_id"], name: "index_imports_on_hospital_id"
     t.index ["name", "hospital_id"], name: "index_imports_on_name_and_hospital_id", unique: true
   end
@@ -64,7 +66,18 @@ ActiveRecord::Schema[7.1].define(version: 2025_04_24_221430) do
     t.index ["medical_record_number", "hospital_id"], name: "index_patients_on_mrn_and_hospital_id", unique: true
   end
 
+  create_table "vitals", force: :cascade do |t|
+    t.bigint "patient_id", null: false
+    t.string "vital_type", null: false
+    t.decimal "measurement", precision: 10, scale: 2, null: false
+    t.string "unit", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["patient_id"], name: "index_vitals_on_patient_id"
+  end
+
   add_foreign_key "addresses", "patients"
   add_foreign_key "imports", "hospitals"
   add_foreign_key "patients", "hospitals"
+  add_foreign_key "vitals", "patients"
 end

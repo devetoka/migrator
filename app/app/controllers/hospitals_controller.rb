@@ -1,11 +1,15 @@
 # frozen_string_literal: true
 class HospitalsController < ApplicationController
-
+  before_action :set_hospital, only: [:show]
   def index
     @hospitals = Hospital.order(created_at: :desc)
   end
   def new
     @hospital = Hospital.new
+  end
+
+  def show
+    @patients = @hospital.patients.includes(:address).order(:first_name)
   end
 
   def create
@@ -18,6 +22,11 @@ class HospitalsController < ApplicationController
   end
 
   private
+
+  def set_hospital
+    @hospital = Hospital.find(params[:id])
+  end
+
 
   def hospital_params
     params.require(:hospital).permit(:name, :code)

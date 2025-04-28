@@ -12,4 +12,9 @@ mappings:
     city: "City"
     region: "Province"
     postal_code: "Postal Code"
+  vitals:
+    vital_type: "vitals"
+    measurement: "measurement value"
+    unit: "unit"
+    medical_record_number: "MRN"
 delimiter: ','

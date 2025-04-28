@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 class ImportsController < ApplicationController
   before_action :set_hospital, only: [:index, :new, :create]
+  before_action :set_import, only: [:errors]
 
   def index
     if @hospital.present?
@@ -11,6 +12,24 @@ class ImportsController < ApplicationController
   end
   def new
     @import = @hospital.imports.new
+  end
+  def errors
+    error_logs = @import.error_logs.flat_map do |log|
+      log["error"].split(',').map(&:strip).map do |error_message|
+        log.merge("error" => error_message)
+      end
+    end
+
+    @error_groups = error_logs.group_by { |log| log["error"] }
+    @error_groups = @error_groups.transform_values { |logs| logs.count }
+
+    @error_stats = {
+      total_errors: error_logs.count,
+      unique_error_types: @error_groups.keys.count,
+      errors_by_line: error_logs.group_by { |log| log["line"] }.transform_values { |logs| logs.count }
+    }
+
+    @error_logs = @import.error_logs
   end
 
   def create
@@ -68,5 +87,9 @@ class ImportsController < ApplicationController
 
   def set_hospital
     @hospital = Hospital.find(params[:hospital_id]) if params[:hospital_id].present?
+  end
+
+  def set_import
+    @import = Import.find(params[:id])
   end
 end

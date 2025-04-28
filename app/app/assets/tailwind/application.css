@@ -11,6 +11,18 @@ input {
     border-radius: 0 !important;
 }
 
+.bg-indigo-600 {
+    background: #675cd3 !important;
+}
+
+.bg-indigo-dark {
+    background: #3427b4 !important;
+}
+
+.bg-purple {
+    background: #f5f2fe !important;
+}
+
 input[type='submit'], button[type='submit'] {
     @apply bg-brand-color  cursor-pointer
 }

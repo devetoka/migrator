@@ -8,14 +8,21 @@ Rails.application.routes.draw do
   mount Sidekiq::Web => "/sidekiq"
 
   # Defines the root path route ("/")
-  # root "posts#index"
-  resources :hospitals, only: [:index, :new, :create] do
+  root "hospitals#index"
+  resources :hospitals do
     resources :imports, only: [:new, :create, :index] do
     end
   end
 
-  get 'imports', to: 'imports#index', as: :imports
+  resources :imports, only: [:index] do
+    member do
+      get :errors
+    end
+  end
+
   post 'imports/uploaded', to: 'imports#uploaded', as: 'import_uploaded'
+
+  get 'patients/:id', to: 'patients#show', as: 'patient'
 
   get '/imports/sample-yaml', to: 'imports#sample_yaml', as: 'sample_yaml_imports'
   get '/imports/:id/yaml-download', to: 'imports#download_yaml', as: 'yaml_import_download'

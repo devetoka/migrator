@@ -3,6 +3,7 @@ class Patient < ActiveRecord::Base
 
   attr_accessor :skip_mrn_validation
   belongs_to :hospital
+  has_many :vitals
   has_one :address
 
   before_validation :transform_values
@@ -23,6 +24,16 @@ class Patient < ActiveRecord::Base
   validates :phone_number, presence: { message: "phone number is required"}
   validates :email, format: { with: URI::MailTo::EMAIL_REGEXP, allow_nil: false }
 
+  def full_name
+    "#{first_name} #{last_name}"
+  end
+
+  def sex
+    case self.gender&.downcase
+      when 'm' then 'Male'
+      when 'f' then 'Female'
+    end
+  end
 
   private
 
