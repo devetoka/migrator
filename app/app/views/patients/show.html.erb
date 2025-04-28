@@ -1,0 +1,82 @@
+<div class="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-7xl mx-auto">
+    <div class="bg-white rounded-lg shadow-lg p-8 animate-fade-in">
+      <!-- Header -->
+      <div class="flex justify-between items-center mb-6">
+        <div>
+          <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight"><%= @patient.full_name %></h1>
+          <p class="mt-1 text-sm text-gray-600">Medical Record Number: <%= @patient.medical_record_number %></p>
+        </div>
+        <div class="flex space-x-4">
+          <a href="<%= hospital_path(@patient.hospital) %>" class="inline-flex items-center px-4 py-2 bg-gray-200 text-gray-800 text-sm font-medium rounded-md shadow-sm hover:bg-gray-300 transition duration-200">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+            Back to Hospital
+          </a>
+        </div>
+      </div>
+
+      <!-- Flash Messages -->
+      <%= render 'shared/flash' %>
+
+      <!-- Patient Details -->
+      <div class="mb-8">
+        <h2 class="text-xl font-semibold text-gray-900 mb-4">Patient Details</h2>
+        <dl class="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
+          <div>
+            <dt class="text-sm font-medium text-gray-500">Email</dt>
+            <dd class="mt-1 text-sm text-gray-900"><%= @patient.email %></dd>
+          </div>
+          <div>
+            <dt class="text-sm font-medium text-gray-500">Address</dt>
+            <dd class="mt-1 text-sm text-gray-900">
+              <%= @patient.address ? "#{@patient.address.street}, #{@patient.address.city}" : 'N/A' %>
+            </dd>
+          </div>
+        </dl>
+      </div>
+
+      <!-- Vitals List -->
+      <div id="vitals-list">
+        <h2 class="text-xl font-semibold text-gray-900 mb-4">Vitals</h2>
+        <% if @patient.vital.any? %>
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gray-50">
+              <tr>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Measurement </th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Recorded At</th>
+              </tr>
+              </thead>
+              <tbody class="bg-white divide-y divide-gray-200">
+              <% @patient.vital.each do |vital| %>
+                <tr class="hover:bg-gray-50 transition duration-200">
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><%= vital.vital_type %></td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><%= "#{vital.measurement} #{vital.unit}" %></td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><%= vital.created_at.strftime("%Y-%m-%d %H:%M") %></td>
+                </tr>
+              <% end %>
+              </tbody>
+            </table>
+          </div>
+        <% else %>
+          <div class="text-center py-12">
+            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
+            <h3 class="mt-2 text-lg font-medium text-gray-900">No vitals recorded</h3>
+            <p class="mt-1 text-gray-500">No vital signs have been recorded for this patient.</p>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fade-in {
+        animation: fadeIn 0.5s ease-out;
+    }
+</style>
