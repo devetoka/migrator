@@ -9,6 +9,6 @@ class PatientsController < ApplicationController
   private
 
   def set_patient
-    @patient = Patient.includes(:hospital, :address, :vital).find(params[:id])
+    @patient = Patient.includes(:hospital, :address, :vitals).find(params[:id])
   end
 end

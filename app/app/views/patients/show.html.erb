@@ -38,7 +38,7 @@
       <!-- Vitals List -->
       <div id="vitals-list">
         <h2 class="text-xl font-semibold text-gray-900 mb-4">Vitals</h2>
-        <% if @patient.vital.any? %>
+        <% if @patient.vitals.any? %>
           <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
               <thead class="bg-gray-50">
@@ -49,7 +49,7 @@
               </tr>
               </thead>
               <tbody class="bg-white divide-y divide-gray-200">
-              <% @patient.vital.each do |vital| %>
+              <% @patient.vitals.each do |vital| %>
                 <tr class="hover:bg-gray-50 transition duration-200">
                   <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><%= vital.vital_type %></td>
                   <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><%= "#{vital.measurement} #{vital.unit}" %></td>
