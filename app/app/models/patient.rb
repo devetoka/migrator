@@ -39,11 +39,14 @@ class Patient < ActiveRecord::Base
 
   def transform_values
     self.gender = case self.gender&.downcase
-      when 'male' then 'M'
-      when 'female' then 'F'
-      else self.gender
-    end
-
+                  when 'male', 'm'
+                    'M'
+                  when 'female', 'f'
+                    'F'
+                  else
+                    self.gender
+                  end
+    self.email = self.email&.strip
     begin
       self.date_of_birth = Date.parse(self.date_of_birth.to_s).strftime('%Y-%m-%d') if self.date_of_birth.present?
     rescue ArgumentError

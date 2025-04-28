@@ -25,11 +25,11 @@ class ImportJob < ApplicationJob
       @import.update!(
         status: 'completed',
         row_count: result[:rows_count] || 0,
-        error_count: result[:errors].size,
+        error_count: result[:errors].present? ? result[:errors]&.size : 0,
         error_logs: JSON.parse(result[:errors].to_json),
         time_taken: end_time - start_time
       )
-      if result[:errors].size > 0
+      if result[:errors].present? && result[:errors].size > 0
         puts result[:errors].inspect
       end
     rescue StandardError => e

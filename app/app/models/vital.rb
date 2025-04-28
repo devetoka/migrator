@@ -13,7 +13,7 @@ class Vital < ApplicationRecord
 
 
   VALID_HEIGHT_UNITS = %w[cm m in ft]
-  VALID_WEIGHT_UNITS = %w[kg g lb oz]
+  VALID_WEIGHT_UNITS = %w[kg g lbs oz]
 
 
   private
@@ -28,6 +28,10 @@ class Vital < ApplicationRecord
   # All weights unit must be compatible.
   # here, we convert all measurements to kg for weight and cm for length
   def convert_unit_measurement
+    unless VALID_HEIGHT_UNITS.include?(unit) || VALID_WEIGHT_UNITS.include?(unit)
+      errors.add(:unit, "is invalid")
+      throw(:abort)
+    end
     if is_weight? && unit != 'kg'
       unit_obj = Unit.new("#{measurement} #{unit}")
       if unit_obj.compatible?(Unit.new('kg'))
